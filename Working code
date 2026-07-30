@@ -1,0 +1,56 @@
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 4, 3, 2, 13);
+const int ENA = 9;
+const int IN1 = 8;
+const int IN2 = 7;
+const int potPin = A0;
+const int buttonPin = 6;
+bool direction = true;     
+bool lastButtonState = HIGH;
+void setup()
+{
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  lcd.begin(16, 2);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("DC Motor Ctrl");
+  delay(2000);
+}
+void loop()
+{
+  int potValue = analogRead(potPin);
+  int pwmValue = map(potValue, 0, 1023, 0, 255);
+  int speedPercent = map(potValue, 0, 1023, 0, 100);
+  bool buttonState = digitalRead(buttonPin);
+  if(buttonState == LOW && lastButtonState == HIGH)
+  {
+    direction = !direction;
+    delay(250);  
+  }
+  lastButtonState = buttonState;
+  if(direction)
+  {
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+  }
+  else
+  {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
+  }
+  analogWrite(ENA, pwmValue);
+  lcd.setCursor(0,0);
+  lcd.print("Speed:");
+  lcd.print(speedPercent);
+  lcd.print("%   ");
+  lcd.setCursor(0,1);
+  if(direction)
+    lcd.print("Dir:FORWARD  ");
+  else
+    lcd.print("Dir:REVERSE  ");
+  delay(100);
+}
